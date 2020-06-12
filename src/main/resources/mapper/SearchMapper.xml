@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.lamprose.bookshell.dao.SearchMapper">
+    <resultMap id="searchBookBean" type="HashMap">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="bookShelfId" column="book_shelf_id"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="isLend" column="is_lend"/>
+        <association property="bookInfo" javaType="HashMap">
+            <result property="coverImg" column="cover_img"/>
+            <result property="title" column="title"/>
+        </association>
+    </resultMap>
+    <resultMap id="BookShelfBean" type="io.github.lamprose.bookshell.domain.BookShelf">
+        <id property="id" column="id"/>
+        <result property="cityCode" column="city_code"/>
+    </resultMap>
+    <select id="searchBookShelf" resultMap="BookShelfBean">
+        select distinct book_shelf.* from book_shelf
+        inner join book b on book_shelf.id = b.book_shelf_id
+        inner join book_info bi on b.ISBN = bi.ISBN
+        where is_lend=0
+        <if test="key != null">and title like concat('%',#{key},'%')</if>
+        <if test="cityCode != -1">and city_code = #{cityCode}</if>
+    </select>
+    <select id="searchBookInBookShelf" resultMap="searchBookBean">
+        select book.*,book_info.* from book
+        inner join book_info on book.ISBN = book_info.ISBN
+        inner join book_shelf on book.book_shelf_id = book_shelf.id
+        where is_lend=0
+        <if test="key != null">and title like concat('%',#{key},'%')</if>
+        <if test="cityCode != -1">and city_code = #{cityCode}</if>
+        <if test="bookShelfId !=null">and book_shelf_id = #{bookShelfId}</if>
+    </select>
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.lamprose.bookshell.dao.HandwritingMapper">
+    <resultMap id="handwritingMap" type="io.github.lamprose.bookshell.domain.Handwriting">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="desc" column="desc"/>
+        <result property="content" column="content"/>
+        <result property="bookId" column="book_id"/>
+        <result property="time" column="time"/>
+    </resultMap>
+    <resultMap id="handwritingHashMap" type="HashMap">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="desc" column="desc"/>
+        <result property="content" column="content"/>
+        <result property="bookId" column="book_id"/>
+        <result property="time" column="time"/>
+        <result property="ISBN" column="ISBN"/>
+        <result property="title" column="title"/>
+    </resultMap>
+    <select id="getHandwritingByPage" resultMap="handwritingHashMap">
+        select handwriting.*,book_info.cover_img,book_info.title from handwriting
+        inner join book on handwriting.book_id = book.id
+        inner join book_info on book.ISBN = book_info.ISBN
+        <trim prefix="where" suffixOverrides="and">
+            <if test="username != 'ALL'">handwriting.user_name = #{username} and</if>
+            <if test="isbn != 'ALL' and isbn != null">book_info.ISBN=#{isbn} and</if>
+            <if test="bookId != -1">handwriting.book_id = #{bookId} and</if>
+        </trim>
+        order by handwriting.time desc
+        <if test="page != -1">limit ${(page-1)*10},10</if>
+    </select>
+    <select id="getByPageCount" resultType="int">
+        select count(*) from test.handwriting
+        <if test="isbn != 'ALL' and isbn != null">
+            inner join book on handwriting.book_id = book.id
+            inner join book_info on book.ISBN = book_info.ISBN
+        </if>
+        <trim prefix="where" suffixOverrides="and">
+            <if test="username != 'ALL'">handwriting.user_name = #{username} and</if>
+            <if test="isbn != 'ALL' and isbn != null">book_info.ISBN=#{isbn} and</if>
+            <if test="bookId != -1">handwriting.book_id = #{bookId} and</if>
+        </trim>
+    </select>
+    <select id="getById" resultMap="handwritingHashMap">
+        select handwriting.*,book_info.cover_img,book_info.title,book_info.ISBN
+        from handwriting
+        inner join book on handwriting.book_id = book.id
+        inner join book_info on book.ISBN = book_info.ISBN
+        where handwriting.id=#{id}
+    </select>
+    <select id="getCount" resultType="int">
+        select count(*) from handwriting
+    </select>
+    <insert id="insertHandwriting" parameterType="Handwriting" keyProperty="id" useGeneratedKeys="true">
+        insert into handwriting
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            user_name,
+            book_id,
+            <if test="desc != null">desc,</if>
+            <if test="content != null">content,</if>
+            <if test="time != null">time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{userName,jdbcType=INTEGER},
+            #{bookId,jdbcType=INTEGER},
+            <if test="desc != null">#{desc,jdbcType=VARCHAR},</if>
+            <if test="content != null">#{content,jdbcType=VARCHAR},</if>
+            <if test="time != null">#{time,jdbcType=DATE},</if>
+        </trim>
+    </insert>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.lamprose.bookshell.dao.UserMapper">
+    <resultMap id="UserMap" type="io.github.lamprose.bookshell.domain.User">
+        <id property="id"  column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+    </resultMap>
+    <resultMap id="UserHashMap" type="HashMap">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+    <select parameterType="String" resultMap="UserMap" id="findByUserName">
+        SELECT * from user
+            where user_name= #{userName}
+    </select>
+    <select id="getInfo" resultMap="UserHashMap">
+        select id,user_name from user
+            where user_name=#{userName}
+    </select>
+    <insert id="insertUser" parameterType="User">
+        insert into user(user_name,password)
+            value(#{userId},#{userName},#{password})
+    </insert>
+    <update id="updatePassword" parameterType="User">
+        update user set password=#{password} where user_name={username}
+    </update>
+</mapper>

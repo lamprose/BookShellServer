@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <properties>
+        <property name="LOG_HOME">E:/logs</property>
+        <property name="FILE_NAME">myLog</property>
+        <property name="REQUEST_HOME">request</property>
+        <property name="log.file.level">info</property>
+        <property name="log.sql.level">info</property>
+        <property name="FORMAT">%d{HH:mm:ss.SSS} [%t] %-5level %l - %msg%n</property>
+    </properties>
+
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${FORMAT}" />
+        </Console>
+
+        <RollingRandomAccessFile name="LogRequest" fileName="${LOG_HOME}/${REQUEST_HOME}/${FILE_NAME}.log" filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${FORMAT}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="Log" fileName="${LOG_HOME}/${FILE_NAME}.log" filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${FORMAT}"/>
+            <Filters>
+                <RegexFilter regex=".*org.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex=".*bookshell.*" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console" />
+        </Root>
+
+        <!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
+        <Logger name="org.springframework.boot" level="INFO"/>
+        <Logger name="org.mybatis" level="INFO"/>
+
+        <Logger name="io.github.lamprose.bookshell" level="${log.file.level}" additivity="false">
+            <AppenderRef ref="Log"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="io.github.lamprose.bookshell.interceptor.LogInterceptor" level="INFO" additivity="false">
+            <AppenderRef ref="LogRequest"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>

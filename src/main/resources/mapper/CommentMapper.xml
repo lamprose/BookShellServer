@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.lamprose.bookshell.dao.CommentMapper">
+    <resultMap id="handwritingMap" type="io.github.lamprose.bookshell.domain.Comment">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="desc" column="desc"/>
+        <result property="content" column="content"/>
+        <result property="handwritingId" column="handwriting_id"/>
+        <result property="time" column="time"/>
+    </resultMap>
+    <resultMap id="handwritingHashMap" type="HashMap">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="desc" column="desc"/>
+        <result property="content" column="content"/>
+        <result property="bookId" column="book_id"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="ISBN" column="ISBN"/>
+        <result property="title" column="title"/>
+    </resultMap>
+    <select id="getCommentByPage" resultMap="handwritingHashMap">
+        select * from comment where
+        <if test="handwritingId != -1">comment.handwriting_id = #{handwritingId}</if>
+        order by comment.time desc
+        <if test="page != -1">limit ${(page-1)*10},10</if>
+    </select>
+    <select id="getByPageCount" resultType="int">
+        select count(*) from comment where
+        <if test="handwritingId != -1">comment.handwriting_id = #{handwritingId}</if>
+    </select>
+    <select id="getCount" resultType="int">
+        select count(*) from handwriting
+    </select>
+    <insert id="insertComment" parameterType="Comment" keyProperty="id" useGeneratedKeys="true">
+        insert into comment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            user_name,
+            handwriting_id,
+            <if test="content != null">content,</if>
+            <if test="time != null">time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{userName,jdbcType=INTEGER},
+            #{handwritingId,jdbcType=INTEGER},
+            <if test="content != null">#{content,jdbcType=VARCHAR},</if>
+            <if test="time != null">#{time,jdbcType=DATE},</if>
+        </trim>
+    </insert>
+</mapper>

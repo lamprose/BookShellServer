@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.lamprose.bookshell.dao.BookMapper">
+    <resultMap id="BookMap" type="io.github.lamprose.bookshell.domain.Book">
+        <id property="id"  column="id"/>
+        <result property="ISBN" column="ISBN"/>
+        <result property="bookShelfId" column="book_shelf_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="isLend" column="is_lend"/>
+        <association property="bookInfo" javaType="io.github.lamprose.bookshell.domain.BookInfo">
+            <id property="ISBN" column="ISBN"/>
+            <result property="title" column="title"/>
+            <result property="summary" column="summary"/>
+            <result property="coverImg" column="cover_img"/>
+        </association>
+    </resultMap>
+    <select id="getUserShelfBook" resultMap="BookMap">
+        select * from book
+        inner join book_info bi on book.ISBN = bi.ISBN
+        where is_lend=#{id}
+    </select>
+    <select resultMap="BookMap" id="getBookById">
+        SELECT * from book
+        inner join book_info bi on book.ISBN = bi.ISBN
+        where id= #{id}
+    </select>
+    <insert id="insertHireLend">
+        insert into hire(book_id, user_name, time, type)
+            values(#{bookId,jdbcType=INTEGER},
+                   #{userName,jdbcType=VARCHAR},
+                   #{time,jdbcType=DATE},
+                   'lend')
+    </insert>
+    <insert id="insertHireReturn">
+        insert into hire(book_id, user_name, time, type)
+        values(#{bookId,jdbcType=INTEGER},
+               #{userName,jdbcType=VARCHAR},
+               #{time,jdbcType=DATE},
+               'return')
+    </insert>
+    <update id="updateIsLend">
+        update book
+            SET is_lend=#{isLend,jdbcType=INTEGER}
+            WHERE id=#{bookId,jdbcType=INTEGER}
+    </update>
+    <insert id="insertBook" keyProperty="id" useGeneratedKeys="true" parameterType="Book">
+        insert into book(ID,ISBN, BOOK_SHELF_ID, USER_NAME)
+        values (#{id,jdbcType=INTEGER},
+                #{ISBN,jdbcType=VARCHAR},
+                #{bookShelfId,jdbcType=INTEGER},
+                #{userName,jdbcType=VARCHAR})
+    </insert>
+    <select id="countBook" resultType="Integer">
+        select count(*) from book
+    </select>
+</mapper>
